@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type='text/javascript' src="Matrix.js"></script>
+<script type='text/javascript' src="WaveFunction.js"></script>
+<script type='text/javascript' src="PDE.js"></script>
+<script type='text/javascript' src="GameModel.js"></script>
+<script type='text/javascript' src="QuantumPong.js"></script>
+</head>
+
+<body onload="setupGame()">
+
+<h1>Quantum Pong</h1>
+
+<p><b><a href="help.html">Help</a></b><p>
+<canvas id="myCanvas" width="600" height="400"></canvas>
+</br>
+<button type="button" onclick="startGame()">(Re)Start Game</button>
+<button type="button" onclick="resetGame()">Reset Game</button>
+
+<table width="600">
+<tr>
+<td>
+<b><p id="player1">Player 1: 0</p></b>
+</td>
+<td>
+<b><p id="player2" align="right">Player 2: 0</p></b>
+</td>
+</tr>
+</table>
+<p><i>Copyright Daniel Zerbino, 2013</i></p>
+</body>
+</html> 
