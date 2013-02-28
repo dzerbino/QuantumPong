@@ -113,8 +113,9 @@ function setupPotential() {
 
 function randomWavevector() {
 	var angle = Math.random() * 2 * Math.PI;
-	// If velocity > Pi/2 = 1.57 mesuring the gradient does not work.
-	var velocity = 1.5;
+	// If velocity > Pi phasing analysis goes berserk
+	// Already velocity = 3, the convergence is rather weird
+	var velocity = 2.5;
 	return {x:Math.cos(angle) * velocity, y:Math.sin(angle) * velocity};
 }
 

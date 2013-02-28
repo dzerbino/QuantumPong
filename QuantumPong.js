@@ -190,7 +190,7 @@ function measurement() {
 	} else {
 		var k = Psi.wavevector(position.x , position.y);
 		var norm_k = Math.sqrt(k.x*k.x + k.y*k.y);
-		var correction = 1.5 / norm_k;
+		var correction = 2.5 / norm_k;
 		Psi = collapsedWaveFunction(position.x, position.y, correction * k.x, correction * k.y);
 		whiteFlash();
 		setTimeout(kickOff, flashLength);

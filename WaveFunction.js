@@ -110,13 +110,21 @@ function WaveFunction(Real, Im) {
 		var y;
 
 		if (i > 0 || i < width - 1) {
-			x = Psi.phi(i+1,j) - Psi.phi(i-1,j);
-			if (x > Math.PI) {
-				x -= 2 * Math.PI;
-			} else if (x < - Math.PI) {
-				x += 2 * Math.PI;
+			// Why compute x1, then x2 then sum them up? If frequency is high x1 + x2 approaches Pi 
+			// which is ambiguous
+			x1 = Psi.phi(i+1,j) - Psi.phi(i,j);
+			if (x1 > Math.PI) {
+				x1 -= 2 * Math.PI;
+			} else if (x1 < - Math.PI) {
+				x1 += 2 * Math.PI;
 			}
-			x /= 2;
+			x2 = Psi.phi(i,j) - Psi.phi(i-1,j);
+			if (x2 > Math.PI) {
+				x2 -= 2 * Math.PI;
+			} else if (x2 < - Math.PI) {
+				x2 += 2 * Math.PI;
+			}
+			x = (x1 + x2) / 2;
 		} else if (i > 0) {
 			x = Psi.phi(i,j) - Psi.phi(i-1,j);
 			if (x > Math.PI) {
@@ -134,13 +142,19 @@ function WaveFunction(Real, Im) {
 		}
 
 		if (j > 0 || j < height - 1) {
-			y = (Psi.phi(i,j+1) - Psi.phi(i,j-1));
-			if (y > Math.PI) {
-				y -= 2 * Math.PI;
-			} else if (y < - Math.PI) {
-				y += 2 * Math.PI;
+			y1 = Psi.phi(i,j+1) - Psi.phi(i,j);
+			if (y1 > Math.PI) {
+				y1 -= 2 * Math.PI;
+			} else if (y1 < - Math.PI) {
+				y1 += 2 * Math.PI;
 			}
-			y = y/2;
+			y2 = Psi.phi(i,j) - Psi.phi(i,j-1);
+			if (y2 > Math.PI) {
+				y2 -= 2 * Math.PI;
+			} else if (y2 < - Math.PI) {
+				y2 += 2 * Math.PI;
+			}
+			y = (y1 + y2) / 2;
 		} else if (i > 0) {
 			y = Psi.phi(i,j) - Psi.phi(i,j-1);
 			if (y > Math.PI) {
