@@ -39,7 +39,9 @@ function WaveFunction(Real, Im) {
 	this.normalize = normalize;
 	this.maxNorm = maxNorm;
 	this.wavevector = wavevector;
-	this.grad = grad;
+	this.norm = norm;
+	this.gradPhi = gradPhi;
+	this.phi = phi;
 
 	function add(B) {
 		return new WaveFunction(this.Real.add(B.Real), this.Im.add(B.Im));
@@ -47,6 +49,12 @@ function WaveFunction(Real, Im) {
 
 	function scale(k) {
 		return new WaveFunction(this.Real.scale(k), this.Im.scale(k));
+	}
+
+	function squaredNorm(i, j) {
+		var r = this.Real.e(i,j);
+		var i = this.Im.e(i,j);
+		return r * r + i * i; 
 	}
 
 	function total_norm() {
@@ -65,12 +73,6 @@ function WaveFunction(Real, Im) {
 		return new WaveFunction(this.Real.scale(correction), this.Im.scale(correction));
 	}
 
-	function squaredNorm(i, j) {
-		var r = this.Real.e(i,j);
-		var i = this.Im.e(i,j);
-		return r * r + i * i; 
-	}
-
 	function maxNorm() {
 		var max = -1;
 		for (i=0; i<width; i++) {
@@ -84,42 +86,83 @@ function WaveFunction(Real, Im) {
 		return Math.sqrt(max);
 	}
 
-	function grad(i,j) {
-		// Returns complex vector!
-		var x_r;
-		var y_r;
-		var x_i;
-		var y_i;
+	function norm(i ,j) {
+		return Math.sqrt(this.squaredNorm(i,j));
+	}
+
+	function phi(i, j) {
+		real = Psi.Real.e(i,j);
+		im = Psi.Im.e(i,j);
+
+		if (real > 0) {
+			return Math.atan(im/real);
+		} else if (real < 0) {
+			return Math.atan(im/real) + Math.PI;
+		} else if (im > 0) {
+			return Math.PI;
+		} else {
+			return -Math.PI;
+		}
+	}
+
+	function gradPhi(i,j) {
+		var x;
+		var y;
 
 		if (i > 0 || i < width - 1) {
-			x_r = (Psi.Real.e(i+1,j) - Psi.Real.e(i-1,j))/2;
-			x_i = (Psi.Im.e(i+1,j) - Psi.Im.e(i-1,j))/2;
+			x = Psi.phi(i+1,j) - Psi.phi(i-1,j);
+			if (x > Math.PI) {
+				x -= 2 * Math.PI;
+			} else if (x < - Math.PI) {
+				x += 2 * Math.PI;
+			}
+			x /= 2;
 		} else if (i > 0) {
-			x_r = Psi.Real.e(i,j) - Psi.Real.e(i-1,j);
-			x_i = Psi.Im.e(i,j) - Psi.Im.e(i-1,j);
+			x = Psi.phi(i,j) - Psi.phi(i-1,j);
+			if (x > Math.PI) {
+				x -= 2 * Math.PI;
+			} else if (x < - Math.PI) {
+				x += 2 * Math.PI;
+			}
 		} else {
-			x_r = Psi.Real.e(i+1,j) - Psi.Real.e(i,j);
-			x_i = Psi.Im.e(i+1,j) - Psi.Im.e(i,j);
+			x = Psi.phi(i+1,j) - Psi.phi(i,j);
+			if (x > Math.PI) {
+				x -= 2 * Math.PI;
+			} else if (x < - Math.PI) {
+				x += 2 * Math.PI;
+			}
 		}
 
 		if (j > 0 || j < height - 1) {
-			y_r = (Psi.Real.e(i,j+1) - Psi.Real.e(i,j-1))/2;
-			y_i = (Psi.Im.e(i,j+1) - Psi.Im.e(i,j-1))/2;
+			y = (Psi.phi(i,j+1) - Psi.phi(i,j-1));
+			if (y > Math.PI) {
+				y -= 2 * Math.PI;
+			} else if (y < - Math.PI) {
+				y += 2 * Math.PI;
+			}
+			y = y/2;
 		} else if (i > 0) {
-			y_r = Psi.Real.e(i,j) - Psi.Real.e(i,j-1);
-			y_i = Psi.Im.e(i,j) - Psi.Im.e(i,j-1);
+			y = Psi.phi(i,j) - Psi.phi(i,j-1);
+			if (y > Math.PI) {
+				y -= 2 * Math.PI;
+			} else if (y < - Math.PI) {
+				y += 2 * Math.PI;
+			}
 		} else {
-			y_r = Psi.Real.e(i,j+1) - Psi.Real.e(i,j);
-			y_i = Psi.Im.e(i,j+1) - Psi.Im.e(i,j);
+			y = Psi.phi(i,j+1) - Psi.phi(i,j);
+			if (y > Math.PI) {
+				y -= 2 * Math.PI;
+			} else if (y < - Math.PI) {
+				y += 2 * Math.PI;
+			}
 		}
 
-		return {x_r:x_r,x_i:x_i,y_r:y_r,y_i:y_i};
+
+		return {x:x,y:y};
 	}
 
 	function wavevector(i,j) {
-		// -i * grad (Psi)
-		var grad = this.grad(i, j);
-		return {x_r:grad.x_i ,x_i:-grad.x_r ,y_r:grad.y_i ,y_i:-grad.y_r};
+		return this.gradPhi(i, j);
 	}
 }
 

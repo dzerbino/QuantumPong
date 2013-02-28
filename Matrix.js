@@ -33,13 +33,9 @@ function Matrix(width, height) {
 	this.height = height;
 
 	// Making space
-	this.columns = new Array(); 
-	for (i = 0; i < width; i++) {
-		column = new Array();
-		for (j = 0; j < height; j++) {
-			column.push(0);
-		}
-		this.columns.push(column);
+	this.data = new Array(); 
+	for (i = 0; i < width * height; i++) {
+		this.data.push(0);
 	}
 
 	this.add = add;
@@ -101,11 +97,11 @@ function Matrix(width, height) {
 	}
  
 	function element(i,j) {
-		return this.columns[i][j];
+		return this.data[i + width * j];
 	}
 
 	function setElement(i,j,val) {
-		this.columns[i][j] = val;
+		this.data[i + width * j] = val;
 	}
 
 	function min() {

@@ -68,7 +68,7 @@ function _2dGaussian(x, y, sigma) {
 	return res;
 }
 
-function collapsedWaveFunction(x, y, k_x_r, k_r_i, k_y_r, k_y_i) {
+function collapsedWaveFunction(x, y, k_x, k_y) {
 	var norm = _2dGaussian(x, y, sigma);
 	var res = new WaveFunction(new Matrix(width, height), new Matrix(width, height));
 
@@ -76,8 +76,7 @@ function collapsedWaveFunction(x, y, k_x_r, k_r_i, k_y_r, k_y_i) {
 		for (j = 0; j < height; j++) {
 			// Fixed momentum...
 			// Yes, I ignored the Heisenberg uncertainty around the wave vector, sue me.
-			// DEBUG
-			var phase = i * k_x_r + j * k_y_r;
+			var phase = i * k_x + j * k_y;
 
 			res.Real.setE(i, j, norm.Real.e(i,j) * Math.cos(phase));
 		 	res.Im.setE(i, j, norm.Real.e(i,j) * Math.sin(phase));
@@ -94,7 +93,7 @@ function setupPlayers() {
 	player2Position = toInt(height/2);
 	playerW = toInt(width / 20);
 	playerH = toInt(height / 5);
-	playerStep = toInt(playerH / 5);
+	playerStep = Math.max(1, toInt(playerH / 20));
 	player1Score = 0;
 	player2Score = 0;
 }
@@ -113,20 +112,20 @@ function setupPotential() {
 }
 
 function randomWavevector() {
-	// Note: Norm of wave number = 1, could be modulated for velocity
-	// Note: Always real... but I believe that's irrelevant (??)
 	var angle = Math.random() * 2 * Math.PI;
-	return {x_r:Math.cos(angle), x_i:0, y_r:Math.sin(angle), y_i:0};
+	// If velocity > Pi/2 = 1.57 mesuring the gradient does not work.
+	var velocity = 1.5;
+	return {x:Math.cos(angle) * velocity, y:Math.sin(angle) * velocity};
 }
 
 function createObstacles() {
 	res = new Matrix(width, height);
 
 	// Player 1's obtacle
-	var left = player1Line - toInt(playerW)/2
-	var right = player1Line + toInt(playerW)/2
-	var low = player1Position - toInt(playerH)/2
-	var high = player1Position + toInt(playerH)/2
+	var left = player1Line - toInt(playerW)/2;
+	var right = player1Line + toInt(playerW)/2;
+	var low = player1Position - toInt(playerH)/2;
+	var high = player1Position + toInt(playerH)/2;
 	for (i=0; i<width; i++) {
 		for (j=0; j<height; j++) {
 			var xCoeff;
@@ -152,10 +151,10 @@ function createObstacles() {
 	}
 
 	// Player 2's obtacle
-	var left = player2Line - toInt(playerW)/2
-	var right = player2Line + toInt(playerW)/2
-	var low = player2Position - toInt(playerH)/2
-	var high = player2Position + toInt(playerH)/2
+	var left = player2Line - toInt(playerW)/2;
+	var right = player2Line + toInt(playerW)/2;
+	var low = player2Position - toInt(playerH)/2;
+	var high = player2Position + toInt(playerH)/2;
 	for (i=0; i<width; i++) {
 		for (j=0; j<height; j++) {
 			var xCoeff;
@@ -183,15 +182,14 @@ function createObstacles() {
 	return res.maxp(fixedObstacles);
 }
 
-function resolvePsi() {
+function determinePosition() {
 	// Choose from 2D probability mass function
 	var val = Math.random();
 	var total = 0;
 	for (i = 0; i < width; i++) {
 		for (j = 0; j < height; j++) {
-			// Note: for precision better to add to 0 than substract from 1
 			total += Psi.squaredNorm(i,j);
-			if (val <= total) {
+			if (total > val) {
 				return {x:i,y:j};
 			}
 		}

@@ -32,19 +32,20 @@
 var canvas;
 var ctx;
 var scale=6;
+var phasedDisplay = false;
+var fillPlayers = true;
 
 // Timing variables
 var interval;
 var refresh = 20;
 var flashLength = 50;
 
-
 function drawPsi() {
 	var maxNorm = Psi.maxNorm();
-	if (false) {
+	if (phasedDisplay) {
+		// Phased display (mainly debugging): Red = real component, Blue = imaginary component
 		for (i=0; i<width; i++) {
 			for (j=0; j<height; j++) {
-				// Phased display
 				var red = toInt(128 * Psi.Real.e(i,j) / (maxNorm) + 128).toString(16).toUpperCase();
 				if (red.length == 1) {
 					red = "0" + red;
@@ -58,10 +59,10 @@ function drawPsi() {
 			}
 		}
 	} else {
+		// Unphased display: white = |Psi|^2, i.e. probability of presence 
 		maxNorm = maxNorm * maxNorm;
 		for (i=0; i<width; i++) {
 			for (j=0; j<height; j++) {
-				// Unphased display
 				var red = toInt(255 * Psi.squaredNorm(i,j) / maxNorm).toString(16).toUpperCase();
 				if (red.length == 1) {
 					red = "0" + red;
@@ -74,9 +75,11 @@ function drawPsi() {
 }
 
 function drawPlayers() {
-	ctx.fillStyle="#FFFFFF";
-	ctx.fillRect(scale * (player1Line - playerW / 2), scale * (player1Position - playerH / 2), scale * playerW, scale * playerH);
-	ctx.fillRect(scale * (player2Line - playerW / 2), scale * (player2Position - playerH / 2), scale * playerW, scale * playerH);
+	if (fillPlayers) {
+		ctx.fillStyle="#FFFFFF";
+		ctx.fillRect(scale * (player1Line - playerW / 2), scale * (player1Position - playerH / 2), scale * playerW, scale * playerH);
+		ctx.fillRect(scale * (player2Line - playerW / 2), scale * (player2Position - playerH / 2), scale * playerW, scale * playerH);
+	}
 }
 
 function draw() {
@@ -120,7 +123,7 @@ function setupGame() {
 	setupPotential();
 	// Kinda useless, computation, just to display something when the page loads...
 	k = randomWavevector();
-	Psi = collapsedWaveFunction(toInt(width/2), toInt(height/2), k.x_r, k.x_i, k.y_r, k.y_i);
+	Psi = collapsedWaveFunction(toInt(width/2), toInt(height/2), k.x, k.y);
 	draw();
 }
 
@@ -173,7 +176,7 @@ function updateScoreBoard(player1Score, player2Score, quantum) {
 
 function measurement() {
 	clearInterval(interval);
-	position = resolvePsi();
+	position = determinePosition();
 	if (checkGoals(position)) {
 		if (position.x < player1Line) {
 			player2Score += 1;
@@ -181,12 +184,14 @@ function measurement() {
 			player1Score += 1;
 		}
 		updateScoreBoard(player1Score, player2Score, false);
-		Psi = collapsedWaveFunction(position.x, position.y, 1, 0, 0, 0);
+		Psi = collapsedWaveFunction(position.x, position.y, 1, 0);
 		whiteFlash();
 		setTimeout(draw, flashLength);
 	} else {
 		var k = Psi.wavevector(position.x , position.y);
-		Psi = collapsedWaveFunction(position.x, position.y, k.x_r, k.x_i, k.y_r, k.y_i);
+		var norm_k = Math.sqrt(k.x*k.x + k.y*k.y);
+		var correction = 1.5 / norm_k;
+		Psi = collapsedWaveFunction(position.x, position.y, correction * k.x, correction * k.y);
 		whiteFlash();
 		setTimeout(kickOff, flashLength);
 	}
@@ -210,8 +215,8 @@ function startGame() {
 	// Stop what is going on (if in the middle of something)
 	clearInterval(interval);
 	// Ball in the middle...
-	k = randomWavevector();
-	Psi = collapsedWaveFunction(toInt(width/2), toInt(height/2), k.x_r, k.x_i, k.y_r, k.y_i);
+	var k = randomWavevector();
+	Psi = collapsedWaveFunction(toInt(width/2), toInt(height/2), k.x, k.y);
 	// Kick off!
 	kickOff();
 }
