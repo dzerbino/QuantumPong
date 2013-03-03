@@ -227,3 +227,13 @@ function resetGame() {
 	// Reset variables
 	setupGame();
 }
+
+function pause() {
+	// Stop what is going on
+	clearInterval(interval);
+}
+
+function unpause() {
+	// Schedule infinite loop
+	interval = setInterval(timeStep, refresh);
+}
