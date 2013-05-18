@@ -1,3 +1,5 @@
+Demo: dzerbino.github.com/QuantumPong
+
 Basically, this is an exercise for me to learn how to code in JavaScript, and do some numerical coding while I'm at it.
 
 To run, simply point your Browser onto index.html, and read the help page.
