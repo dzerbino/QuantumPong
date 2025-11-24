@@ -1,4 +1,4 @@
-[Demo](dzerbino.github.io/QuantumPong)
+[Demo](https://dzerbino.github.io/QuantumPong)
 
 Basically, this is an exercise for me to learn how to code in JavaScript, and do some numerical coding while I'm at it.
 
